@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forex Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+      background: url('https://i.postimg.cc/PNs9K9c5/20250131-124242-0000.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.0); /* Fully transparent */
+      box-shadow: none;
+      backdrop-filter: none;
+      border-radius: 8px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffffff;
+      font-size: 22px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    input, select, button {
+      width: 75%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    button {
+      background-color: #006400;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      margin-right: 10px;
+      transition: 0.3s ease;
+      display: block;
+      margin: 20px auto;
+    }
+
+    button:hover {
+      background-color: #004d00;
+    }
+
+    .profit-loss-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.5); /* Overlay for visibility */
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .profit, .loss {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .profit {
+      color: #32cd32;
+    }
+
+    .loss {
+      color: #ff6347;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Forex Calculator</h1>
+    <form id="tradeForm">
+      <div class="form-group">
+        <label for="asset">Currency Pair</label>
+        <select id="asset" required>
+          <optgroup label="Major Pairs">
+            <option value="EUR/USD">EUR/USD</option>
+            <option value="GBP/USD">GBP/USD</option>
+            <option value="USD/JPY">USD/JPY</option>
+            <option value="AUD/USD">AUD/USD</option>
+            <option value="USD/CAD">USD/CAD</option>
+            <option value="USD/CHF">USD/CHF</option>
+            <option value="NZD/USD">NZD/USD</option>
+          </optgroup>
+          <optgroup label="Minor Pairs">
+            <option value="EUR/GBP">EUR/GBP</option>
+            <option value="EUR/AUD">EUR/AUD</option>
+            <option value="GBP/JPY">GBP/JPY</option>
+            <option value="AUD/NZD">AUD/NZD</option>
+            <option value="NZD/JPY">NZD/JPY</option>
+            <option value="CHF/JPY">CHF/JPY</option>
+            <option value="EUR/NZD">EUR/NZD</option>
+          </optgroup>
+          <optgroup label="Additional Pairs">
+            <option value="AUD/CAD">AUD/CAD</option>
+            <option value="CAD/JPY">CAD/JPY</option>
+            <option value="EUR/JPY">EUR/JPY</option>
+            <option value="GBP/AUD">GBP/AUD</option>
+            <option value="GBP/CHF">GBP/CHF</option>
+            <option value="NZD/CAD">NZD/CAD</option>
+            <option value="USD/MXN">USD/MXN</option>
+            <option value="USD/ZAR">USD/ZAR</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="positionType">Position</label>
+        <select id="positionType" required>
+          <option value="Buy">Buy</option>
+          <option value="Sell">Sell</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="lotSize">Lot Size</label>
+        <input type="number" id="lotSize" placeholder="e.g., 0.1000" step="0.0001" min="0" required>
+      </div>
+      <div class="form-group">
+        <label for="entryPrice">Entry Price</label>
+        <input type="number" id="entryPrice" placeholder="e.g., 1.2345" step="0.0001" required>
+      </div>
+      <div class="form-group">
+        <label for="takeProfit">Take Profit</label>
+        <input type="number" id="takeProfit" placeholder="e.g., 1.2500" step="0.0001" required>
+      </div>
+      <div class="form-group">
+        <label for="stopLoss">Stop Loss</label>
+        <input type="number" id="stopLoss" placeholder="e.g., 1.2000" step="0.0001" required>
+      </div>
+
+      <div class="profit-loss-row">
+        <span class="profit" id="profitDisplay">Profit: $0.00</span>
+        <span class="loss" id="lossDisplay">Loss: $0.00</span>
+      </div>
+
+      <button type="button" id="calculateButton">Calculate</button>
+      <button type="reset" id="resetButton">Reset</button>
+    </form>
+  </div>
+
+  <script>
+    const calculateButton = document.getElementById('calculateButton');
+    const resetButton = document.getElementById('resetButton');
+    const profitDisplay = document.getElementById('profitDisplay');
+    const lossDisplay = document.getElementById('lossDisplay');
+
+    calculateButton.addEventListener('click', function () {
+      const lotSize = parseFloat(document.getElementById('lotSize').value) || 0;
+      const entryPrice = parseFloat(document.getElementById('entryPrice').value) || 0;
+      const takeProfit = parseFloat(document.getElementById('takeProfit').value) || 0;
+      const stopLoss = parseFloat(document.getElementById('stopLoss').value) || 0;
+
+      const contractSize = 100000;
+
+      const profit = Math.abs((takeProfit - entryPrice) * lotSize * contractSize);
+      const loss = Math.abs((entryPrice - stopLoss) * lotSize * contractSize);
+
+      profitDisplay.textContent = `Profit: $${profit.toFixed(2)}`;
+      lossDisplay.textContent = `Loss: $${loss.toFixed(2)}`;
+    });
+
+    resetButton.addEventListener('click', function () {
+      document.getElementById('tradeForm').reset();
+      profitDisplay.textContent = "Profit: $0.00";
+      lossDisplay.textContent = "Loss: $0.00";
+    });
+  </script>
+</body>
+</html>
